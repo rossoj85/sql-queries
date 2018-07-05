@@ -113,3 +113,49 @@ WHERE genre = 'Film-Noir' and year%4=0;
             AND a2.last_name = 'Bacon'
     )
     AND full_name != 'Kevin Bacon';
+
+    ----IMORTALS--------------
+
+    SELECT first_name, last_name, actors.id
+    FROM actors
+        JOIN roles ON roles.actor_id= actors.id
+        JOIN movies ON movies.id=roles.movie_id
+    WHERE movies.year<1900
+    INTERSECT
+    SELECT first_name, last_name, actors.id
+    FROM actors
+        JOIN roles ON roles.actor_id= actors.id
+        JOIN movies ON movies.id=roles.movie_id
+    WHERE movies.year>2000
+    ORDER BY last_name
+    ;
+---BUSY FILMING 
+    SELECT count(DISTINCT roles.role) as num_roles_in_movies, *
+    FROM actors
+    JOIN roles on roles.actor_id=actors.id
+    JOIN movies on roles.movie_id= movies.id
+    WHERE movies.year>1990 
+    GROUP BY actors.id,movies.id
+    HAVING  num_roles_in_movies > 4;
+
+--FEMALE ACTORS ONLY
+    SELECT movies.year, COUNT(*) as movies_in_year
+    FROM movies 
+    WHERE movies.id NOT IN(
+    SELECT DISTINCT movies.id
+    FROM movies 
+    JOIN roles on movies.id =roles.movie_id
+    JOIN actors 
+    ON roles.actor_id = actors.id
+    AND actors.gender = 'M'
+    --this gives us all the movies that have at least one male actor
+    )
+    AND movies.id IN (
+         SELECT DISTINCT movies.id
+    FROM movies 
+    JOIN roles on movies.id =roles.movie_id
+    JOIN actors 
+    ON roles.actor_id = actors.id
+    AND actors.gender = 'F'
+    )
+    GROUP BY movies.year;
